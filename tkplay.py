@@ -2,21 +2,17 @@
 pygame/tkinter version of basic music player
 """
 import tkinter as tk
+import tkinter.filedialog as fd
 import pygame
 from pathlib import Path
 from functools import partial
-from os import chdir
+from os import chdir, environ
 
 
 class MusicPlayer:
     def __init__(self, root):
         self.root = root
-        self.root.title("Music Player")
-        self.root.geometry("1000x200")
-        pygame.init()
-        pygame.mixer.init()
-        self.MUSIC_END = pygame.USEREVENT
-        pygame.mixer.music.set_endevent(self.MUSIC_END)
+        self.MUSIC_END = pygame.USEREVENT + 1
         self.track = tk.StringVar()
         self.status = tk.StringVar()
         # GUI colors:
@@ -27,25 +23,18 @@ class MusicPlayer:
         self.secondary_color = "#1f250e"
         ## gui ##
         ### partialization ###
-        frame = partial(
-            tk.LabelFrame,
-            master=self.root,
-            font=("Victor Mono", 15, "bold"),
-            bg=self.bg_color,
-            fg=self.text_color,
-            bd=5,
-            relief=tk.GROOVE,
-        )
-        grid = partial
-        trackframe = frame(text="Track")
-        buttonframe = frame(text="Control Panel")
-        songsframe = frame(text="Playlist")
-        trackframe.place(x=0, y=0, width=600, height=100)
-        buttonframe.place(x=0, y=100, width=600, height=100)
-        songsframe.place(x=600, y=0, width=400, height=200)
+        self.plase_init()
+        self.place_frames()
+        ###!only (not)works for Win10/11 ###
+        environ["SDL_WINDOWID"] = str(self.embedframe.winfo_id())
+        environ["SDL_VIDEODRIVER"] = "windib"
+        pygame.display.init()
+        self.screen = pygame.display.set_mode()
+        pygame.display.flip()
+
         label = partial(
             tk.Label,
-            master=trackframe,
+            master=self.trackframe,
             anchor=tk.W,
             textvariable=self.track,
             font=("Victor Mono", 24, "bold"),
@@ -59,7 +48,7 @@ class MusicPlayer:
         # buttons
         button = partial(
             tk.Button,
-            master=buttonframe,
+            master=self.buttonframe,
             width=2,
             height=1,
             font=("Victor Mono", 20),
@@ -75,9 +64,9 @@ class MusicPlayer:
         stopbtn = button(text="\u23F9", command=self.stopsong)
         stopbtn.grid(row=0, column=1, padx=5, pady=5)
         # songs list
-        scroll_y = tk.Scrollbar(songsframe, orient=tk.VERTICAL)
+        scroll_y = tk.Scrollbar(self.songsframe, orient=tk.VERTICAL)
         self.playlist = tk.Listbox(
-            songsframe,
+            self.songsframe,
             yscrollcommand=scroll_y.set,
             selectbackground="#B0FC38",
             selectmode=tk.SINGLE,
@@ -91,13 +80,40 @@ class MusicPlayer:
         # set path
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         scroll_y.config(command=self.playlist.yview)
-        self.playlist.pack(fill=tk.BOTH)
+        self.playlist.pack(fill=tk.BOTH, expand=True)
         path_to_music = Path("D:\Музыка\Phone")
         chdir(path_to_music)
         songs = [f for f in path_to_music.iterdir() if f.is_file()]
         for track in songs:
             self.playlist.insert(tk.END, track.parts[-1])
         self.playlist.bind("<Double-Button-1>", self.playsong)
+
+    def plase_init(self):
+        self.root.title("Music Player")
+        self.root.geometry("1000x300")
+        pygame.init()
+        pygame.mixer.init()
+        pygame.mixer.music.set_endevent(self.MUSIC_END)
+
+    def place_frames(self):
+        frame = partial(
+            tk.LabelFrame,
+            master=self.root,
+            font=("Victor Mono", 15, "bold"),
+            bg=self.bg_color,
+            fg=self.text_color,
+            bd=5,
+            relief=tk.GROOVE,
+        )
+
+        self.trackframe = frame(text="Track")
+        self.buttonframe = frame(text="Control Panel")
+        self.songsframe = frame(text="Playlist")
+        self.embedframe = frame(text="Test")
+        self.trackframe.place(x=0, y=0, width=600, height=100)
+        self.buttonframe.place(x=0, y=200, width=600, height=100)
+        self.embedframe.place(x=0, y=100, width=600, height=100)
+        self.songsframe.place(x=600, y=0, width=400, height=300)
 
     def playsong(self, *args):
         self.track.set(self.playlist.get(tk.ACTIVE))
@@ -127,9 +143,20 @@ class MusicPlayer:
             if event.type == self.MUSIC_END:
                 print("music end event")
                 self.status = ""
-            root.after(100, self.check_events)
+            # for search TODO: delete after binding
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    fd.askdirectory()
+            self.root.after(100, self.check_events)
+
+    def run(self):
+        self.check_events()
+
+    def equalizer(self):
+        pass
 
 
 root = tk.Tk()
-MusicPlayer(root).check_events()
+app = MusicPlayer(root)
+app.run()
 root.mainloop()
