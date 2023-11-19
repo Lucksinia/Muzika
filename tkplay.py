@@ -1,6 +1,7 @@
 """
 pygame/tkinter version of basic music player
 """
+import tomllib
 import tkinter as tk
 import tkinter.filedialog as fd
 import pygame
@@ -15,13 +16,8 @@ class MusicPlayer:
         self.MUSIC_END = pygame.USEREVENT + 1
         self.track = tk.StringVar()
         self.status = tk.StringVar()
-        # GUI colors:
-        self.text_color = "#f0f0f0"
-        self.bg_color = "#050505"
-        self.primary_color = "#ff602c"
-        self.acsent_color = "#c3d491"
-        self.secondary_color = "#1f250e"
         ## gui ##
+        self.load_toml()
         ### partialization ###
         self.plase_init()
         self.place_frames()
@@ -94,6 +90,17 @@ class MusicPlayer:
         pygame.init()
         pygame.mixer.init()
         pygame.mixer.music.set_endevent(self.MUSIC_END)
+
+    def load_toml(self):
+        with open("settings.toml", "rb") as toml:
+            data = tomllib.load(toml)
+        # load GUI colors
+        colors = data["colors"]
+        self.text_color = colors["text"]
+        self.bg_color = colors["bg"]
+        self.primary_color = colors["primary"]
+        self.acsent_color = colors["acsent"]
+        self.secondary_color = colors["secondary"]
 
     def place_frames(self):
         frame = partial(
