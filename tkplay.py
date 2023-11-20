@@ -28,37 +28,8 @@ class MusicPlayer:
         self.screen = pygame.display.set_mode()
         pygame.display.flip()
 
-        label = partial(
-            tk.Label,
-            master=self.trackframe,
-            anchor=tk.W,
-            textvariable=self.track,
-            font=("Victor Mono", 24, "bold"),
-            bg=self.bg_color,
-            fg=self.acsent_color,
-        )
-        songtrack = label(width=20).grid(row=0, column=0, padx=10, pady=5)
-        trackstatus = label(textvariable=self.status).grid(
-            row=0, column=1, padx=10, pady=5
-        )
         # buttons
-        button = partial(
-            tk.Button,
-            master=self.buttonframe,
-            width=2,
-            height=1,
-            font=("Victor Mono", 20),
-            fg=self.primary_color,
-            bg=self.bg_color,
-            bd=0,
-            activebackground=self.secondary_color,
-            activeforeground=self.acsent_color,
-        )
-        tk.Button()
-        self.playbtn = button(text="\u23F5", command=self.playsong)
-        self.playbtn.grid(row=0, column=0, padx=5, pady=5)
-        stopbtn = button(text="\u23F9", command=self.stopsong)
-        stopbtn.grid(row=0, column=1, padx=5, pady=5)
+        self.place_buttons()
         # songs list
         scroll_y = tk.Scrollbar(self.songsframe, orient=tk.VERTICAL)
         self.playlist = tk.Listbox(
@@ -122,6 +93,39 @@ class MusicPlayer:
         self.embedframe.place(x=0, y=100, width=600, height=100)
         self.songsframe.place(x=600, y=0, width=400, height=300)
 
+    def place_buttons(self):
+        button = partial(
+            tk.Button,
+            master=self.buttonframe,
+            width=2,
+            height=1,
+            font=("Victor Mono", 20),
+            fg=self.primary_color,
+            bg=self.bg_color,
+            bd=0,
+            activebackground=self.secondary_color,
+            activeforeground=self.acsent_color,
+        )
+        self.playbtn = button(text="\u23F5", command=self.playsong)
+        self.playbtn.grid(row=0, column=0, padx=5, pady=5)
+        stopbtn = button(text="\u23F9", command=self.stopsong)
+        stopbtn.grid(row=0, column=1, padx=5, pady=5)
+
+    def place_lables(self):
+        label = partial(
+            tk.Label,
+            master=self.trackframe,
+            anchor=tk.W,
+            textvariable=self.track,
+            font=("Victor Mono", 24, "bold"),
+            bg=self.bg_color,
+            fg=self.acsent_color,
+        )
+        songtrack = label(width=20).grid(row=0, column=0, padx=10, pady=5)
+        trackstatus = label(textvariable=self.status).grid(
+            row=0, column=1, padx=10, pady=5
+        )
+
     def playsong(self, *args):
         self.track.set(self.playlist.get(tk.ACTIVE))
         self.status.set("is playing")
@@ -163,7 +167,8 @@ class MusicPlayer:
         pass
 
 
-root = tk.Tk()
-app = MusicPlayer(root)
-app.run()
-root.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MusicPlayer(root)
+    app.run()
+    root.mainloop()
