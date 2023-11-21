@@ -35,7 +35,7 @@ class MusicPlayer:
         self.playlist = tk.Listbox(
             self.songsframe,
             yscrollcommand=scroll_y.set,
-            selectbackground="#B0FC38",
+            selectbackground=self.primary_color,
             selectmode=tk.SINGLE,
             font=("Victor Mono", 10, "bold"),
             bg=self.secondary_color,
@@ -48,7 +48,8 @@ class MusicPlayer:
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         scroll_y.config(command=self.playlist.yview)
         self.playlist.pack(fill=tk.BOTH, expand=True)
-        path_to_music = Path("D:\Музыка\Phone")
+        path = fd.askdirectory()
+        path_to_music = Path(path)
         chdir(path_to_music)
         songs = [f for f in path_to_music.iterdir() if f.is_file()]
         for track in songs:
